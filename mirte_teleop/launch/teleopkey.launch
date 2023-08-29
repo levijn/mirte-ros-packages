@@ -6,7 +6,7 @@
           type="teleop_twist_keyboard.py" output="screen">
         <param name="speed" value="0.04"/>
         <param name="turn" value="0.55"/>
-        <remap from="/cmd_vel" to="/mobile_base_controller/cmd_vel"/>
+        <remap from="/cmd_vel" to="/mirte/mobile_base_controller/cmd_vel"/>
     </node>
 
 </launch>
