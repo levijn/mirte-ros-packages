@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 import asyncio
-import nest_asyncio
+# import nest_asyncio
 import os, os.path
 import sys
 import time
@@ -10,10 +10,11 @@ import signal
 import aiorospy
 import io
 from inspect import signature
+import inspect
 from tmx_pico_aio import tmx_pico_aio
 from telemetrix_aio import telemetrix_aio
-
-nest_asyncio.apply()
+import threading
+# nest_asyncio.apply()
 
 # Import the right Telemetrix AIO
 devices = rospy.get_param("/mirte/device")
@@ -53,9 +54,9 @@ from PIL import Image, ImageDraw, ImageFont
 font = ImageFont.load_default()
 
 from adafruit_ssd1306 import _SSD1306
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
-executor = ThreadPoolExecutor(10)
+# executor = ThreadPoolExecutor(10)
 
 
 import mappings.default
@@ -616,6 +617,7 @@ class Oled(_SSD1306):
         )
 
     async def start(self):
+        self.busy = False
         server = rospy.Service(
             "/mirte/set_" + self.oled_obj["name"] + "_image",
             SetOLEDImage,
@@ -623,8 +625,10 @@ class Oled(_SSD1306):
         )
 
         for ev in self.init_awaits:
+            #print("aw",inspect.currentframe().f_lineno)
             await ev
         for cmd in self.write_commands:
+            #print("aw",inspect.currentframe().f_lineno)
             out = await self.board.i2c_write(60, cmd, i2c_port=self.i2c_port)
             if (
                 out == False
@@ -634,6 +638,7 @@ class Oled(_SSD1306):
                 return
 
     async def set_oled_image_service_async(self, req):
+        self.busy = True
         if req.type == "text":
             text = req.value.replace("\\n", "\n")
             image = Image.new("1", (128, 64))
@@ -649,8 +654,10 @@ class Oled(_SSD1306):
                 draw.text((1, y_text), line, font=font, fill=255)
                 y_text += height
             self.image(image)
+            #print("aw",inspect.currentframe().f_lineno)
             await self.show_async()
         if req.type == "image":
+            #print("aw",inspect.currentframe().f_lineno)
             await self.show_png(
                 "/usr/local/src/mirte/mirte-oled-images/images/" + req.value + ".png"
             )  # open color image
@@ -667,7 +674,9 @@ class Oled(_SSD1306):
                 ]
             )
             for i in range(number_of_images):
+                #print("aw",inspect.currentframe().f_lineno)
                 await self.show_png(folder + req.value + "_" + str(i) + ".png")
+        self.busy = False
 
     def set_oled_image_service(self, req):
         if self.failed:
@@ -675,7 +684,16 @@ class Oled(_SSD1306):
             return SetOLEDImageResponse(False)
 
         try:
-            self.loop.run_until_complete(self.set_oled_image_service_async(req))
+            print("start oled", threading.get_ident())
+            start_time = time.time()
+            while self.busy and time.time() - start_time < 1: #while still processing previous and less than 1s
+                time.sleep(0.01)
+            if(time.time() - start_time >= 1):
+                self.failed = True
+                return SetOLEDImageResponse(False)
+            self.loop.create_task(self.set_oled_image_service_async(req))
+            
+            print("stop oled", threading.get_ident())
         except Exception as e:
             print(e)
         return SetOLEDImageResponse(True)
@@ -710,6 +728,7 @@ class Oled(_SSD1306):
             return
         self.temp[0] = 0x80
         self.temp[1] = cmd
+        #print("aw",inspect.currentframe().f_lineno)
         out = await self.board.i2c_write(60, self.temp, i2c_port=self.i2c_port)
         if out == False:
             print("failed write oled 2")
@@ -739,6 +758,7 @@ class Oled(_SSD1306):
                 self.write_cmd_async(self.pages - 1),
                 *self.write_framebuf_async(),
             ]
+            #print("aw",inspect.currentframe().f_lineno)
             await asyncio.gather(*cmds)
         except Exception as e:
             print(e)
@@ -750,6 +770,7 @@ class Oled(_SSD1306):
         async def task(self, i):
             buf = self.buffer[i * 16 : (i + 1) * 16 + 1]
             buf[0] = 0x40
+            #print("aw",inspect.currentframe().f_lineno, threading.get_ident(), threading.current_thread().name)
             out = await self.board.i2c_write(60, buf, i2c_port=self.i2c_port)
             if out == False:
                 print("failed wrcmd")
@@ -770,6 +791,7 @@ class Oled(_SSD1306):
         image_file = Image.open(file)  # open color image
         image_file = image_file.convert("1", dither=Image.NONE)
         self.image(image_file)
+        #print("aw",inspect.currentframe().f_lineno)
         await self.show_async()
 
 
@@ -822,14 +844,8 @@ def handle_get_pin_value(req):
         if req.type == "digital":
             asyncio.run(board.set_pin_mode_digital_input(pin, callback=data_callback))
 
-    # timeout after 5s, don't keep waiting on something that will never happen.
-    start_time = time.time()
-    while not pin in pin_values and time.time() - start_time < 5.0:
-        time.sleep(0.001)
-    if pin in pin_values:
-        value = pin_values[pin]
-    else:
-        value = -1  # device did not report back, so return error value.
+    while not pin in pin_values:
+        time.sleep(0.00001)
 
     value = pin_values[pin]
     return GetPinValueResponse(value)
@@ -1028,7 +1044,8 @@ async def shutdown(loop, board):
 
         # Stop the asyncio loop
         loop.stop()
-        print("Telemetrix shutdown nicely")
+        print("Telemetrix shutdown nicely123!")
+        rospy.signal_shutdown(0)
 
 
 if __name__ == "__main__":
@@ -1074,3 +1091,4 @@ if __name__ == "__main__":
     # will just keep the node running only in a asyncio
     # way.
     loop.run_forever()
+    print("done")
