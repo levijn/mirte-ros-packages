@@ -1,3 +1,4 @@
+---
 device:
   mirte:
     type: pcb
@@ -26,7 +27,7 @@ encoder:
     ticks_per_wheel: 20
 intensity:
   left:
-    name: left 
+    name: left
     device: mirte
     connector: IR2
   right:
@@ -47,8 +48,7 @@ servo:
     name: left
     device: mirte
     connector: Servo1
-servo:
-  left:
+  right:
     name: right
     device: mirte
     connector: Servo2

@@ -1,3 +1,4 @@
+---
 device:
   mirte:
     type: breadboard
@@ -21,27 +22,27 @@ encoder:
     name: left
     device: mirte
     pins:
-      pin: B12           # pin needs interrupt support
+      pin: B12  # pin needs interrupt support
     ticks_per_wheel: 20
   right:
     name: right
     device: mirte
     pins:
-      pin: B4           # pin needs interrupt support
+      pin: B4  # pin needs interrupt support
     ticks_per_wheel: 20
 intensity:
   left:
-    name: left 
+    name: left
     device: mirte
     pins:
       digital: C15
-      analog: A0         # pin needs analog input
+      analog: A0  # pin needs analog input
   right:
     name: right
     device: mirte
     pins:
       digital: A2
-      analog: A1         # pin needs analog input
+      analog: A1  # pin needs analog input
 oled:
   left:
     name: left
@@ -71,7 +72,7 @@ keypad:
     name: keypad
     device: mirte
     pins:
-      pin: A4              # pin needs analog input
+      pin: A4  # pin needs analog input
 motor:
   left:
     name: left

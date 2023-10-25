@@ -1,3 +1,4 @@
+---
 device:
   mirte:
     type: pcb
@@ -23,7 +24,7 @@ encoder:
     connector: ENC2
 intensity:
   left:
-    name: left 
+    name: left
     device: mirte
     connector: IR1
   right:
@@ -39,17 +40,18 @@ oled:
     name: right
     device: mirte
     connector: I2C1
-# Servo on GP2 doens't work with the v0.6 pcb, next version this should be fixed
-#  left:
-#    name: left
-#    device: mirte
-#    connector: Servo1
+    # Servo on GP2 doens't work with the v0.6 pcb, next version this should be fixed
+    #  left:
+    #    name: left
+    #    device: mirte
+    #    connector: Servo1
+servo:
   right:
     name: right
     device: mirte
     connector: Servo2
-# These servo's have the same pins as the ObjectDetectors. So as
-# soon as they are implemented, these should be commented out
+    # These servo's have the same pins as the ObjectDetectors. So as
+    # soon as they are implemented, these should be commented out
   gripper:
     name: gripper
     device: mirte
@@ -58,7 +60,6 @@ oled:
     name: arm
     device: mirte
     connector: Servo4
-
 keypad:
   yellow:
     name: keypad

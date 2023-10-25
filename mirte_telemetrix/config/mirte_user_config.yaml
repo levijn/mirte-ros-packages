@@ -1,3 +1,4 @@
+---
 device:
   mirte:
     type: breadboard
@@ -16,7 +17,7 @@ distance:
     pins:
       trigger: GP7
       echo: GP6
-#encoder:
+# encoder:
 #  left:
 #    name: left
 #    device: mirte
@@ -29,7 +30,7 @@ distance:
 #      pin: GP15
 intensity:
   left:
-    name: left 
+    name: left
     device: mirte
     pins:
       analog: GP27
@@ -53,28 +54,28 @@ oled:
     pins:
       sda: GP4
       scl: GP5
-servo: 
+servo:
   left:
     name: left
     device: mirte
     pins:
       pin: GP3
-# Servo on GP2 doens't work with the v0.6 pcb, next version this should be fixed
-#  right:
-#    name: right
-#    device: mirte
-#    pins:
-#      pin: GP2
-# These servo's have the same pins as the ObjectDetectors. So as 
-# soon as they are implemented, these should be commented out
+      # Servo on GP2 doens't work with the v0.6 pcb, next version this should be fixed
+      #  right:
+      #    name: right
+      #    device: mirte
+      #    pins:
+      #      pin: GP2
+      # These servo's have the same pins as the ObjectDetectors. So as 
+      # soon as they are implemented, these should be commented out
   gripper:
     name: gripper
     device: mirte
     pins:
       pin: GP12
   arm:
-    name: arm 
-    device: mirte 
+    name: arm
+    device: mirte
     pins:
       pin: GP13
 keypad:

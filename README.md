@@ -71,5 +71,13 @@ clang-format --dry-run --Werror ./**/**.cpp -style=llvm
 clang-format --Werror ./**/**.cpp -style=llvm -i
 ```
 
+```sh
+pip install yamllint
+yamllint .
+# Fix by using
+pip install yamlfix
+yamlfix .
+```
+
 # Required packages Telemetrix
 Requires https://github.com/mirte-robot/tmx-pico-aio.git to be installed ( ```pip install git+https://github.com/mirte-robot/tmx-pico-aio.git``` ) for the Pico and https://github.com/mirte-robot/telemetrix-aio.git for the STM32 and Arduino Nano (```pip install git+https://github.com/mirte-robot/telemetrix-aio.git```).
