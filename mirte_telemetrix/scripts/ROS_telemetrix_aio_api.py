@@ -617,7 +617,6 @@ class Oled(_SSD1306):
         )
 
     async def start(self):
-        self.busy = False
         server = rospy.Service(
             "/mirte/set_" + self.oled_obj["name"] + "_image",
             SetOLEDImage,
@@ -625,10 +624,8 @@ class Oled(_SSD1306):
         )
 
         for ev in self.init_awaits:
-            #print("aw",inspect.currentframe().f_lineno)
             await ev
         for cmd in self.write_commands:
-            #print("aw",inspect.currentframe().f_lineno)
             out = await self.board.i2c_write(60, cmd, i2c_port=self.i2c_port)
             if (
                 out == False
@@ -638,7 +635,6 @@ class Oled(_SSD1306):
                 return
 
     async def set_oled_image_service_async(self, req):
-        self.busy = True
         if req.type == "text":
             text = req.value.replace("\\n", "\n")
             image = Image.new("1", (128, 64))
@@ -654,10 +650,8 @@ class Oled(_SSD1306):
                 draw.text((1, y_text), line, font=font, fill=255)
                 y_text += height
             self.image(image)
-            #print("aw",inspect.currentframe().f_lineno)
             await self.show_async()
         if req.type == "image":
-            #print("aw",inspect.currentframe().f_lineno)
             await self.show_png(
                 "/usr/local/src/mirte/mirte-oled-images/images/" + req.value + ".png"
             )  # open color image
@@ -674,9 +668,7 @@ class Oled(_SSD1306):
                 ]
             )
             for i in range(number_of_images):
-                #print("aw",inspect.currentframe().f_lineno)
                 await self.show_png(folder + req.value + "_" + str(i) + ".png")
-        self.busy = False
 
     def set_oled_image_service(self, req):
         if self.failed:
@@ -684,16 +676,10 @@ class Oled(_SSD1306):
             return SetOLEDImageResponse(False)
 
         try:
-            print("start oled", threading.get_ident())
-            start_time = time.time()
-            while self.busy and time.time() - start_time < 1: #while still processing previous and less than 1s
-                time.sleep(0.01)
-            if(time.time() - start_time >= 1):
-                self.failed = True
-                return SetOLEDImageResponse(False)
-            self.loop.create_task(self.set_oled_image_service_async(req))
-            
-            print("stop oled", threading.get_ident())
+            # the ros service is started on a different thread than the asyncio loop
+            # When using the normal loop.run_until_complete() function, both threads join in and the oled communication will get broken faster
+            future = asyncio.run_coroutine_threadsafe(self.set_oled_image_service_async(req), self.loop) 
+            future.result() # wait for it to be done
         except Exception as e:
             print(e)
         return SetOLEDImageResponse(True)
@@ -728,7 +714,6 @@ class Oled(_SSD1306):
             return
         self.temp[0] = 0x80
         self.temp[1] = cmd
-        #print("aw",inspect.currentframe().f_lineno)
         out = await self.board.i2c_write(60, self.temp, i2c_port=self.i2c_port)
         if out == False:
             print("failed write oled 2")
@@ -758,7 +743,6 @@ class Oled(_SSD1306):
                 self.write_cmd_async(self.pages - 1),
                 *self.write_framebuf_async(),
             ]
-            #print("aw",inspect.currentframe().f_lineno)
             await asyncio.gather(*cmds)
         except Exception as e:
             print(e)
@@ -770,7 +754,6 @@ class Oled(_SSD1306):
         async def task(self, i):
             buf = self.buffer[i * 16 : (i + 1) * 16 + 1]
             buf[0] = 0x40
-            #print("aw",inspect.currentframe().f_lineno, threading.get_ident(), threading.current_thread().name)
             out = await self.board.i2c_write(60, buf, i2c_port=self.i2c_port)
             if out == False:
                 print("failed wrcmd")
@@ -791,7 +774,6 @@ class Oled(_SSD1306):
         image_file = Image.open(file)  # open color image
         image_file = image_file.convert("1", dither=Image.NONE)
         self.image(image_file)
-        #print("aw",inspect.currentframe().f_lineno)
         await self.show_async()
 
 
