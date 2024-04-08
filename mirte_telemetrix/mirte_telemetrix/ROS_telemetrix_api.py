@@ -8,6 +8,8 @@ from rclpy.node import Node
 import signal
 import io
 
+# Deze wordt niet gebruikt!
+
 # Initialize the ROS node as anonymous since there
 # should only be one instnace running.
 rclpy.init(args=sys.argv)

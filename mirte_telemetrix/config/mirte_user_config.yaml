@@ -59,3 +59,18 @@ mirte_telemetrix:
         pins:
           p1: 20            # pin needs PWM
           p2: 21            # pin needs PWM
+    encoder:
+      left:
+        name: left
+        device: mirte
+        pins:
+          A: 2             # pin needs interrupt support
+          B: 4
+        ticks_per_wheel: 20
+      right:
+        name: right
+        device: mirte
+        pins:
+          A: 3             # pin needs interrupt support
+          B: 5
+        ticks_per_wheel: 20

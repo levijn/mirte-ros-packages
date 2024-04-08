@@ -213,10 +213,10 @@ hardware_interface::return_type DiffBotSystemHardware::read(
     hw_velocities_[i] = hw_commands_[i];
 
     // BEGIN: This part here is for exemplary purposes - Please do not copy to your production code
-    RCLCPP_INFO(
-      rclcpp::get_logger("DiffBotSystemHardware"),
-      "Got position state %.5f and velocity state %.5f for '%s'!", hw_positions_[i],
-      hw_velocities_[i], info_.joints[i].name.c_str());
+    // RCLCPP_INFO(
+    //   rclcpp::get_logger("DiffBotSystemHardware"),
+    //   "Got position state %.5f and velocity state %.5f for '%s'!", hw_positions_[i],
+    //   hw_velocities_[i], info_.joints[i].name.c_str());
     // END: This part here is for exemplary purposes - Please do not copy to your production code
   }
 
@@ -230,9 +230,9 @@ hardware_interface::return_type DiffBotSystemHardware::read(
   base_theta_ += base_dtheta * period.seconds();
 
   // BEGIN: This part here is for exemplary purposes - Please do not copy to your production code
-  RCLCPP_INFO(
-    rclcpp::get_logger("DiffBotSystemHardware"), "Joints successfully read! (%.5f,%.5f,%.5f)",
-    base_x_, base_y_, base_theta_);
+  // RCLCPP_INFO(
+  //   rclcpp::get_logger("DiffBotSystemHardware"), "Joints successfully read! (%.5f,%.5f,%.5f)",
+  //   base_x_, base_y_, base_theta_);
   // END: This part here is for exemplary purposes - Please do not copy to your production code
 
   return hardware_interface::return_type::OK;
@@ -263,16 +263,16 @@ hardware_interface::return_type mirte_control ::DiffBotSystemHardware::write(
 
 
   // BEGIN: This part here is for exemplary purposes - Please do not copy to your production code
-  RCLCPP_INFO(rclcpp::get_logger("DiffBotSystemHardware"), "Writing...");
+  // RCLCPP_INFO(rclcpp::get_logger("DiffBotSystemHardware"), "Writing...");
 
   for (auto i = 0u; i < hw_commands_.size(); i++)
   {
     // Simulate sending commands to the hardware
-    RCLCPP_INFO(
-      rclcpp::get_logger("DiffBotSystemHardware"), "Got command %.5f for '%s'!", hw_commands_[i],
-      info_.joints[i].name.c_str());
+    // RCLCPP_INFO(
+    //   rclcpp::get_logger("DiffBotSystemHardware"), "Got command %.5f for '%s'!", hw_commands_[i],
+    //   info_.joints[i].name.c_str());
   }
-  RCLCPP_INFO(rclcpp::get_logger("DiffBotSystemHardware"), "Joints successfully written!");
+  // RCLCPP_INFO(rclcpp::get_logger("DiffBotSystemHardware"), "Joints successfully written!");
   // END: This part here is for exemplary purposes - Please do not copy to your production code
 
   return hardware_interface::return_type::OK;

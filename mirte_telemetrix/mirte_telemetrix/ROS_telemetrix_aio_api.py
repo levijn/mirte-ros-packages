@@ -14,7 +14,6 @@ from tmx_pico_aio import tmx_pico_aio
 from telemetrix_aio import telemetrix_aio
 import threading
 
-
 rclpy.init(args=sys.argv)
 
 class MyNode(Node):
@@ -383,14 +382,20 @@ class EncoderSensorMonitor(SensorMonitor):
 
     async def start(self):
         if board_mapping.get_mcu() == "pico":
-            await self.board.set_pin_mode_encoder(
-                self.pins["pin"], 0, self.publish_data, False
-            )
+            if "A" in self.pins:  # Only yet Pico support for quadrature encoder
+                await self.board.set_pin_mode_encoder(
+                    self.pins["A"], self.pins["B"], self.publish_data, True
+                )
+            else:
+                await self.board.set_pin_mode_encoder(
+                    self.pins["pin"], 0, self.publish_data, False
+                )
         else:
             await self.board.set_pin_mode_encoder(
                 self.pins["pin"], 2, self.ticks_per_wheel, self.publish_data
             )
-        rospy.Timer(rospy.Duration(1.0 / 10.0), self.publish_speed_data)
+        node.create_timer(0.1, self.publish_speed_data)
+        # rclpy.Timer(rclpy.Duration(1.0 / 10.0), self.publish_speed_data)
 
     def publish_speed_data(self, event=None):
         encoder = Encoder()
@@ -400,7 +405,7 @@ class EncoderSensorMonitor(SensorMonitor):
         self.speed_pub.publish(encoder)
 
     async def publish_data(self, data):
-        self.speed_count = self.speed_count + 1
+        self.speed_count = self.speed_count + data[2]
         encoder = Encoder()
         encoder.header = self.get_header()
         encoder.value = data[2]
@@ -1034,7 +1039,7 @@ def sensors(loop, board, device):
 
     # Initialize encoder sensors
     if ("encoder" in params):
-        encoder_sensors = params("encoder")
+        encoder_sensors = params["encoder"]
         encoder_sensors = {
             k: v for k, v in encoder_sensors.items() if v["device"].get_parameter_value().string_value == device == device
         }
